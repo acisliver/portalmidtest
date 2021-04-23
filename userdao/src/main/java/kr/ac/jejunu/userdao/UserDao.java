@@ -4,141 +4,35 @@ import javax.sql.DataSource;
 import java.sql.*;
 
 public class UserDao {
-    private final DataSource dataSource;
+    private final Context context;
 
-    public UserDao(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public UserDao(Context context) {
+        this.context = context;
     }
 
 
     public User get(Integer id) throws SQLException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        User user = null;
-        try {
-            connection = dataSource.getConnection();
-
-            StatementStragety statementStragety = new GetStatementStragety();
-            preparedStatement = statementStragety.makeStatement(connection, id);
-
-
-            resultSet = preparedStatement.executeQuery();
-            if(resultSet.next()){
-                user = new User();
-                user.setId(resultSet.getInt("id"));
-                user.setName(resultSet.getString("name"));
-                user.setPassword(resultSet.getString("password"));
-            }
-        } finally {
-            try {
-                resultSet.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-            try {
-                preparedStatement.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-            try {
-                connection.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-        }
-        return user;
+        StatementStragety statementStragety = new GetStatementStragety(id);
+        return context.JdbcContextForGet(statementStragety);
     }
 
-    public void insert(User user) throws SQLException, ClassNotFoundException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        try {
-            connection = dataSource.getConnection();
 
-            StatementStragety statementStragety = new InsertStatementStragety();
-            preparedStatement = statementStragety.makeStatement(connection, user);
-
-            preparedStatement.executeUpdate();
-
-            resultSet = preparedStatement.getGeneratedKeys();
-            resultSet.next();
-
-            user.setId(resultSet.getInt(1));
-        } finally {
-            try {
-                resultSet.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-            try {
-                preparedStatement.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-            try {
-                connection.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-        }
+    public void insert(User user) throws SQLException{
+        StatementStragety statementStragety = new InsertStatementStragety(user);
+        context.JdbcContextForInsert(user, statementStragety);
 
     }
+
 
     public void update(User user) throws SQLException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        try {
-            connection = dataSource.getConnection();
-
-            StatementStragety statementStragety = new UpdateStatementStragety();
-            preparedStatement = statementStragety.makeStatement(connection, user);
-            preparedStatement = connection.prepareStatement(
-                    "update userinfo set name = ?, password = ? where id = ?",
-                    Statement.RETURN_GENERATED_KEYS
-            );
-            preparedStatement.setString(1, user.getName());
-            preparedStatement.setString(2, user.getPassword());
-            preparedStatement.setInt(3, user.getId());
-            preparedStatement.executeUpdate();
-
-        } finally {
-            try {
-                preparedStatement.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-            try {
-                connection.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-        }
+        StatementStragety statementStragety = new UpdateStatementStragety(user);
+        context.JdbcContextForUpdate(statementStragety);
     }
+
 
     public void delete(Integer id) throws SQLException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        try {
-            connection = dataSource.getConnection();
-
-            StatementStragety statementStragety = new DeleteStatementStragety();
-            preparedStatement = statementStragety.makeStatement(connection, id);
-
-            preparedStatement.executeUpdate();
-
-        } finally {
-            try {
-                preparedStatement.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-            try {
-                connection.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-        }
+        StatementStragety statementStragety = new DeleteStatementStragety(id);
+        context.JdbcContextForDelete(statementStragety);
     }
+
 }

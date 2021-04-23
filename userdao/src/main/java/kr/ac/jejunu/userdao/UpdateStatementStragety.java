@@ -6,9 +6,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class UpdateStatementStragety implements StatementStragety {
+    User user;
+    public UpdateStatementStragety(User user) {
+        this.user = user;
+    }
+
     @Override
-    public PreparedStatement makeStatement(Connection connection, Object object) throws SQLException {
-        User user = (User) object;
+    public PreparedStatement makeStatement(Connection connection) throws SQLException {
         PreparedStatement preparedStatement = connection.prepareStatement(
                 "update userinfo set name = ?, password = ? where id = ?",
                 Statement.RETURN_GENERATED_KEYS
