@@ -109,30 +109,6 @@ public class Context {
         }
     }
 
-    void JdbcContextForDelete(StatementStragety statementStragety) throws SQLException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        try {
-            connection = dataSource.getConnection();
-
-            preparedStatement = statementStragety.makeStatement(connection);
-
-            preparedStatement.executeUpdate();
-
-        } finally {
-            try {
-                preparedStatement.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-            try {
-                connection.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-        }
-    }
-
     User get(String sql, Object[] params) throws SQLException {
         return JdbcContextForGet(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
@@ -145,18 +121,6 @@ public class Context {
         });
     }
 
-    void delete(String sql, Object[] params) throws SQLException {
-        JdbcContextForDelete(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    sql,
-                    Statement.RETURN_GENERATED_KEYS
-            );
-            for(int i = 0; i < params.length; i++){
-                preparedStatement.setObject(i + 1, params[i]);
-            }
-            return preparedStatement;
-        });
-    }
 
     void update(String sql, Object[] params) throws SQLException {
         JdbcContextForUpdate(connection -> {

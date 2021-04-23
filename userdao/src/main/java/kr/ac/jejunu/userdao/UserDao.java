@@ -34,7 +34,7 @@ public class UserDao {
     public void delete(Integer id) throws SQLException {
         String sql = "delete from userinfo where id = ?";
         Object[] params = new Object[]{id};
-        context.delete(sql, params);
+        context.update(sql, params);
     }
 
 }
