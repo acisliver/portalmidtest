@@ -12,27 +12,54 @@ public class UserDao {
 
 
     public User get(Integer id) throws SQLException {
-        StatementStragety statementStragety = new GetStatementStragety(id);
-        return context.JdbcContextForGet(statementStragety);
+        return context.JdbcContextForGet(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "select * from userinfo where id = ?"
+            );
+            preparedStatement.setLong(1, id);
+            return preparedStatement;
+        });
     }
 
 
     public void insert(User user) throws SQLException{
-        StatementStragety statementStragety = new InsertStatementStragety(user);
-        context.JdbcContextForInsert(user, statementStragety);
+        context.JdbcContextForInsert(user, connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "insert into userinfo (name, password) values (?, ?)",
+                    Statement.RETURN_GENERATED_KEYS
+            );
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.setString(2, user.getPassword());
+            return preparedStatement;
+        });
 
     }
 
 
     public void update(User user) throws SQLException {
-        StatementStragety statementStragety = new UpdateStatementStragety(user);
-        context.JdbcContextForUpdate(statementStragety);
+
+        context.JdbcContextForUpdate(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "update userinfo set name = ?, password = ? where id = ?",
+                    Statement.RETURN_GENERATED_KEYS
+            );
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.setString(2, user.getPassword());
+            preparedStatement.setInt(3, user.getId());
+            return preparedStatement;
+        });
     }
 
 
     public void delete(Integer id) throws SQLException {
-        StatementStragety statementStragety = new DeleteStatementStragety(id);
-        context.JdbcContextForDelete(statementStragety);
+        context.JdbcContextForDelete(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "delete from userinfo where id = ?",
+                    Statement.RETURN_GENERATED_KEYS
+            );
+            preparedStatement.setInt(1, id);
+            return preparedStatement;
+        });
     }
 
 }
