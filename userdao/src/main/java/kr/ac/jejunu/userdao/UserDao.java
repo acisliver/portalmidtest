@@ -18,8 +18,10 @@ public class UserDao {
         User user = null;
         try {
             connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement("select * from userinfo where id = ?");
-            preparedStatement.setLong(1, id);
+
+            StatementStragety statementStragety = new GetStatementStragety();
+            preparedStatement = statementStragety.makeStatement(connection, id);
+
 
             resultSet = preparedStatement.executeQuery();
             if(resultSet.next()){
@@ -54,12 +56,10 @@ public class UserDao {
         ResultSet resultSet = null;
         try {
             connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement(
-                    "insert into userinfo (name, password) values (?, ?)",
-                    Statement.RETURN_GENERATED_KEYS
-            );
-            preparedStatement.setString(1, user.getName());
-            preparedStatement.setString(2, user.getPassword());
+
+            StatementStragety statementStragety = new InsertStatementStragety();
+            preparedStatement = statementStragety.makeStatement(connection, user);
+
             preparedStatement.executeUpdate();
 
             resultSet = preparedStatement.getGeneratedKeys();
@@ -91,6 +91,9 @@ public class UserDao {
         PreparedStatement preparedStatement = null;
         try {
             connection = dataSource.getConnection();
+
+            StatementStragety statementStragety = new UpdateStatementStragety();
+            preparedStatement = statementStragety.makeStatement(connection, user);
             preparedStatement = connection.prepareStatement(
                     "update userinfo set name = ?, password = ? where id = ?",
                     Statement.RETURN_GENERATED_KEYS
@@ -119,11 +122,10 @@ public class UserDao {
         PreparedStatement preparedStatement = null;
         try {
             connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement(
-                    "delete from userinfo where id = ?",
-                    Statement.RETURN_GENERATED_KEYS
-            );
-            preparedStatement.setInt(1, id);
+
+            StatementStragety statementStragety = new DeleteStatementStragety();
+            preparedStatement = statementStragety.makeStatement(connection, id);
+
             preparedStatement.executeUpdate();
 
         } finally {
